@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChecklistManager
 {
+    // TODO: Logic is mostly done, just need an actual (not in-memory) database and automatic clearing of completed one-off tasks,
+    // plus automatic resetting of scheduled tasks (easy to do with a daily cron job at midnight, or maybe a specified reset time to account
+    // for significantly offsite servers)
     public class Program
     {
         public static void Main(string[] args)
