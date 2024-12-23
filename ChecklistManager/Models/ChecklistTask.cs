@@ -8,15 +8,17 @@ namespace ChecklistManager.Models
 
         public int Id { get; set; }
         public string Description { get; set; } // Description of the task itself
-        CronExpression? Schedule { get; set; } // If null, task is one-off (will rollover, but not repeat, aka always display null scheduled tasks)
         public string? AssignedTo { get; set; } // If null, task is communal
         public TaskState State { get; set; }
         public TaskAssignmentLevel AssignmentLevel { get; set; }
 
+        public string? ScheduleString { get; set; }
+        internal CronExpression? Schedule { get; set; } // If null, task is one-off (will rollover, but not repeat, aka always display null scheduled tasks)
+
+        public ChecklistTask(string description, string? scheduleString, string? assignedTo, TaskAssignmentLevel assignmentLevel)
         {
             Id = nextId++;
             Description = description;
-            Schedule = schedule;
             AssignmentLevel = assignmentLevel;
             State = TaskState.Incomplete;
             AssignedTo = assignedTo;
