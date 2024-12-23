@@ -54,12 +54,12 @@ namespace ChecklistManager.Controllers
             try
             {
                 // Protects against ID collisions after resetting the server, and doubly serves to re-use IDs of deleted tasks
-                while (_context.Tasks.Any(t => t.Id == ChecklistTask.nextId))
+                /*while (_context.Tasks.Any(t => t.Id == ChecklistTask.nextId))
                 {
                     ChecklistTask.nextId++;
-                }
+                }*/
 
-                var task = new ChecklistTask(ChecklistTask.nextId++, description, schedule, assignedTo, (TaskAssignmentLevel)assignmentLevel);
+                var task = new ChecklistTask(/*ChecklistTask.nextId++, */description, schedule, assignedTo, (TaskAssignmentLevel)assignmentLevel);
                 _logger.Log(LogLevel.Information, $"Creating {task.AssignmentLevel} task [ID:{task.Id}]: {task.Description}");
 
                 _context.Add(task);
@@ -68,7 +68,7 @@ namespace ChecklistManager.Controllers
             }
             catch (FormatException)
             {
-                ChecklistTask.nextId--;
+                //ChecklistTask.nextId--;
                 return BadRequest("Cron expression is invalid.");
             }
         }

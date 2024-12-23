@@ -1,9 +1,11 @@
 using ChecklistManager.Models;
+using Hangfire;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChecklistManager
 {
-    // TODO: Logic is mostly done, just need an actual (not in-memory) database and automatic clearing of completed one-off tasks,
+    // TODO: Logic is mostly done, just need automatic clearing of completed one-off tasks,
     // plus automatic resetting of scheduled tasks (easy to do with a daily cron job at midnight, or maybe a specified reset time to account
     // for significantly offsite servers)
     public class Program
@@ -15,7 +17,23 @@ namespace ChecklistManager
             // Add services to the container.
 
             builder.Services.AddControllers();
-            builder.Services.AddDbContext<ChecklistTaskContext>(opt => opt.UseInMemoryDatabase("TaskList"));
+
+            string taskConnectionString = new SqliteConnectionStringBuilder(builder.Configuration.GetConnectionString("TaskDb"))
+            {
+                Mode = SqliteOpenMode.ReadWriteCreate
+            }.ConnectionString;
+
+            using (var connection = new SqliteConnection(taskConnectionString))
+            {
+                connection.Open();
+                var createTableCmd = connection.CreateCommand();
+                createTableCmd.CommandText = "CREATE TABLE IF NOT EXISTS Tasks (Id INTEGER PRIMARY KEY AUTOINCREMENT, Description TEXT NOT NULL, AssignedTo TEXT, State INTEGER NOT NULL, AssignmentLevel INTEGER NOT NULL, ScheduleString TEXT);";
+                createTableCmd.ExecuteNonQuery();
+            }
+
+            builder.Services.AddDbContext<ChecklistTaskContext>(opt => opt.UseSqlite(taskConnectionString));
+            builder.Services.AddHangfire(config => config.UseInMemoryStorage());
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
