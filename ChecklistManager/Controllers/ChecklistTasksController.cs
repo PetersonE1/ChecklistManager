@@ -31,9 +31,11 @@ namespace ChecklistManager.Controllers
 
         // GET: Tasks
         [HttpGet(Name = "Tasks")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(bool filterByDay = false)
         {
-            return new JsonResult(await _context.Tasks.ToListAsync());
+            if (!filterByDay)
+                return new JsonResult(await _context.Tasks.ToListAsync());
+            return new JsonResult((await _context.Tasks.ToListAsync()).Where(t => t.Schedule == null || t.Schedule.IsSatisfiedBy(DateTime.UtcNow)));
         }
 
         // PUT: Tasks/Create
@@ -42,12 +44,17 @@ namespace ChecklistManager.Controllers
         [HttpPut(Name = "Create")]
         public async Task<IActionResult> Create(string description, string schedule, string assignedTo, int assignmentLevel)
         {
+            if (_context.Tasks.Any(t => t.Description == description &&
+                    (t.AssignmentLevel == (TaskAssignmentLevel)assignmentLevel &&
+                    (t.AssignmentLevel == TaskAssignmentLevel.Communal || t.AssignedTo == assignedTo))))
+            {
+                return BadRequest("Task already exists.");
+            }
+
             try
             {
-                var task = new ChecklistTask(description, schedule, assignedTo, (TaskAssignmentLevel)assignmentLevel);
-                _logger.Log(LogLevel.Information, "Creating task: " + task.Description);
-
-                // TODO: Check if equivalent task already exists
+                var task = new ChecklistTask(++ChecklistTask.nextId, description, schedule, assignedTo, (TaskAssignmentLevel)assignmentLevel);
+                _logger.Log(LogLevel.Information, $"Creating {task.AssignmentLevel} task [ID:{task.Id}]: {task.Description}");
 
                 _context.Add(task);
                 await _context.SaveChangesAsync();
@@ -55,6 +62,7 @@ namespace ChecklistManager.Controllers
             }
             catch (FormatException)
             {
+                ChecklistTask.nextId--;
                 return BadRequest("Cron expression is invalid.");
             }
         }
@@ -63,7 +71,7 @@ namespace ChecklistManager.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost(Name = "Edit")]
-        public async Task<IActionResult> Edit(int id, string? description, string? schedule, string? assignedTo, int? assignmentLevel, int? state)
+        public async Task<IActionResult> Edit(uint id, string? description, string? schedule, string? assignedTo, int? assignmentLevel, int? state)
         {
             try
             {
@@ -106,7 +114,7 @@ namespace ChecklistManager.Controllers
 
         // DELETE: Tasks/Delete/5
         [HttpDelete(Name = "Delete"), ActionName("Delete")]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(uint id)
         {
             var task = await _context.Tasks.FindAsync(id);
             if (task != null)
@@ -121,7 +129,7 @@ namespace ChecklistManager.Controllers
             return StatusCode(404);
         }
 
-        private bool TaskExists(int id)
+        private bool TaskExists(uint id)
         {
             return _context.Tasks.Any(e => e.Id == id);
         }

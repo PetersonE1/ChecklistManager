@@ -4,18 +4,20 @@ namespace ChecklistManager.Models
 {
     public class ChecklistTask
     {
-        private static int nextId = 0;
+        internal static uint nextId = 0;
 
-        public int Id { get; set; }
+        public uint Id { get; set; }
         public string Description { get; set; } // Description of the task itself
         public string? AssignedTo { get; set; } // If null, task is communal
         public TaskState State { get; set; }
         public TaskAssignmentLevel AssignmentLevel { get; set; }
 
+        // Seconds Minutes Hours Day-of-month Month Day-of-week Year(Optional)
+        // Must assign to exactly one of either Day-of-month or Day-of-week, other must be ?
         public string? ScheduleString { get; set; }
         internal CronExpression? Schedule { get; set; } // If null, task is one-off (will rollover, but not repeat, aka always display null scheduled tasks)
 
-        public ChecklistTask(string description, string? scheduleString, string? assignedTo, TaskAssignmentLevel assignmentLevel)
+        public ChecklistTask(uint id, string description, string? scheduleString, string? assignedTo, TaskAssignmentLevel assignmentLevel)
         {
             ScheduleString = scheduleString;
             UpdateCron();
@@ -24,9 +26,7 @@ namespace ChecklistManager.Models
             AssignmentLevel = assignmentLevel;
             State = TaskState.Incomplete;
             AssignedTo = assignedTo;
-
-
-            Id = nextId++;
+            Id = id;
         }
 
         public void UpdateCron()
@@ -44,7 +44,7 @@ namespace ChecklistManager.Models
 
     public enum TaskAssignmentLevel
     {
-        Personal,
-        Communal
+        Communal,
+        Personal
     }
 }
