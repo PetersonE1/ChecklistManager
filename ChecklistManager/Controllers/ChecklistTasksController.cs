@@ -49,7 +49,7 @@ namespace ChecklistManager.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(task);
+            return new JsonResult(task);
         }
 
         // POST: Tasks/Edit/5
@@ -84,7 +84,7 @@ namespace ChecklistManager.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(task);
+            return new JsonResult(task);
         }
 
         // DELETE: Tasks/Delete/5
