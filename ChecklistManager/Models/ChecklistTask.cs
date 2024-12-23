@@ -4,9 +4,9 @@ namespace ChecklistManager.Models
 {
     public class ChecklistTask
     {
-        internal static uint nextId = 0;
+        internal static uint nextId = 1;
 
-        public uint Id { get; set; }
+        public uint Id { get; set; } // Is it safe to assume someone probably won't make more than 4,294,967,295 different tasks?
         public string Description { get; set; } // Description of the task itself
         public string? AssignedTo { get; set; } // If null, task is communal
         public TaskState State { get; set; }

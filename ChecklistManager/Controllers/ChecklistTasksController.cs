@@ -42,7 +42,7 @@ namespace ChecklistManager.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPut(Name = "Create")]
-        public async Task<IActionResult> Create(string description, string schedule, string assignedTo, int assignmentLevel)
+        public async Task<IActionResult> Create(string description, string? schedule, string? assignedTo, int assignmentLevel)
         {
             if (_context.Tasks.Any(t => t.Description == description &&
                     (t.AssignmentLevel == (TaskAssignmentLevel)assignmentLevel &&
@@ -53,7 +53,13 @@ namespace ChecklistManager.Controllers
 
             try
             {
-                var task = new ChecklistTask(++ChecklistTask.nextId, description, schedule, assignedTo, (TaskAssignmentLevel)assignmentLevel);
+                // Protects against ID collisions after resetting the server, and doubly serves to re-use IDs of deleted tasks
+                while (_context.Tasks.Any(t => t.Id == ChecklistTask.nextId))
+                {
+                    ChecklistTask.nextId++;
+                }
+
+                var task = new ChecklistTask(ChecklistTask.nextId++, description, schedule, assignedTo, (TaskAssignmentLevel)assignmentLevel);
                 _logger.Log(LogLevel.Information, $"Creating {task.AssignmentLevel} task [ID:{task.Id}]: {task.Description}");
 
                 _context.Add(task);
