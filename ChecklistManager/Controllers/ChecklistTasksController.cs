@@ -31,7 +31,7 @@ namespace ChecklistManager.Controllers
         [HttpGet(Name = "Tasks")]
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Tasks.ToListAsync());
+            return new JsonResult(await _context.Tasks.ToListAsync());
         }
 
         // PUT: Tasks/Create
