@@ -77,7 +77,7 @@ namespace ChecklistManager.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost(Name = "Edit")]
-        public async Task<IActionResult> Edit(uint id, string? description, string? schedule, string? assignedTo, int? assignmentLevel, int? state)
+        public async Task<IActionResult> Edit(long id, string? description, string? schedule, string? assignedTo, int? assignmentLevel, int? state)
         {
             try
             {
@@ -120,7 +120,7 @@ namespace ChecklistManager.Controllers
 
         // DELETE: Tasks/Delete/5
         [HttpDelete(Name = "Delete"), ActionName("Delete")]
-        public async Task<IActionResult> DeleteConfirmed(uint id)
+        public async Task<IActionResult> DeleteConfirmed(long id)
         {
             var task = await _context.Tasks.FindAsync(id);
             if (task != null)
@@ -135,7 +135,7 @@ namespace ChecklistManager.Controllers
             return StatusCode(404);
         }
 
-        private bool TaskExists(uint id)
+        private bool TaskExists(long id)
         {
             return _context.Tasks.Any(e => e.Id == id);
         }
