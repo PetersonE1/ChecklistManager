@@ -13,7 +13,7 @@ namespace ChecklistManager.Models
         public TaskState State { get; set; }
         public TaskAssignmentLevel AssignmentLevel { get; set; }
 
-        public ChecklistTask(string name, string description, TaskAssignmentLevel assignmentLevel, CronExpression? schedule, string? assignedTo)
+        public ChecklistTask(string description, TaskAssignmentLevel assignmentLevel, CronExpression? schedule, string? assignedTo)
         {
             Id = nextId++;
             Description = description;

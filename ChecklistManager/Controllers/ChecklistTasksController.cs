@@ -34,61 +34,20 @@ namespace ChecklistManager.Controllers
             return View(await _context.Tasks.ToListAsync());
         }
 
-        // GET: Tasks/Details/5
-        [HttpGet(Name = "Details")]
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var task = await _context.Tasks
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (task == null)
-            {
-                return NotFound();
-            }
-
-            return View(task);
-        }
-
-        // GET: Tasks/Create
-        [HttpGet(Name = "Create")]
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Tasks/Create
+        // PUT: Tasks/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost(Name = "Create")]
+        [HttpPut(Name = "Create")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description")] ChecklistTask task)
+        public async Task<IActionResult> Create([Bind("Description,Schedule,AssignedTo,AssignmentLevel")] ChecklistTask task)
         {
             if (ModelState.IsValid)
             {
+                // TODO: Check if equivalent task already exists
+
                 _context.Add(task);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
-            }
-            return View(task);
-        }
-
-        // GET: Tasks/Edit/5
-        [HttpGet(Name = "Edit")]
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var task = await _context.Tasks.FindAsync(id);
-            if (task == null)
-            {
-                return NotFound();
             }
             return View(task);
         }
@@ -98,7 +57,7 @@ namespace ChecklistManager.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost(Name = "Edit")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description")] Task task)
+        public async Task<IActionResult> Edit(int id, [Bind("Description,Schedule,AssignedTo,AssignmentLevel,State")] Task task)
         {
             if (id != task.Id)
             {
@@ -128,27 +87,8 @@ namespace ChecklistManager.Controllers
             return View(task);
         }
 
-        // GET: Tasks/Delete/5
-        [HttpGet(Name = "Delete")]
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var task = await _context.Tasks
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (task == null)
-            {
-                return NotFound();
-            }
-
-            return View(task);
-        }
-
-        // POST: Tasks/Delete/5
-        [HttpPost(Name = "Delete"), ActionName("Delete")]
+        // DELETE: Tasks/Delete/5
+        [HttpDelete(Name = "Delete"), ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
