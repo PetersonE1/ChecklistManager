@@ -17,14 +17,21 @@ namespace ChecklistManager.Models
 
         public ChecklistTask(string description, string? scheduleString, string? assignedTo, TaskAssignmentLevel assignmentLevel)
         {
-            Id = nextId++;
+            ScheduleString = scheduleString;
+            UpdateCron();
+
             Description = description;
             AssignmentLevel = assignmentLevel;
             State = TaskState.Incomplete;
             AssignedTo = assignedTo;
 
-            ScheduleString = scheduleString;
-            Schedule = scheduleString != null ? new CronExpression(scheduleString) : null;
+
+            Id = nextId++;
+        }
+
+        public void UpdateCron()
+        {
+            Schedule = ScheduleString != null ? new CronExpression(ScheduleString) : null;
         }
     }
 

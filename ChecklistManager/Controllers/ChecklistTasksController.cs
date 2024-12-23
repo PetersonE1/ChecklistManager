@@ -14,10 +14,12 @@ namespace ChecklistManager.Controllers
     public class ChecklistTasksController : Controller
     {
         private readonly ChecklistTaskContext _context;
+        private readonly ILogger<ChecklistTasksController> _logger;
 
-        public ChecklistTasksController(ChecklistTaskContext context)
+        public ChecklistTasksController(ChecklistTaskContext context, ILogger<ChecklistTasksController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET -> Gets all tasks (filterable)
@@ -38,68 +40,85 @@ namespace ChecklistManager.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPut(Name = "Create")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Description,ScheduleString,AssignedTo,AssignmentLevel")] ChecklistTask task)
+        public async Task<IActionResult> Create(string description, string schedule, string assignedTo, int assignmentLevel)
         {
-            if (ModelState.IsValid)
+            try
             {
+                var task = new ChecklistTask(description, schedule, assignedTo, (TaskAssignmentLevel)assignmentLevel);
+                _logger.Log(LogLevel.Information, "Creating task: " + task.Description);
+
                 // TODO: Check if equivalent task already exists
 
                 _context.Add(task);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return new JsonResult(task);
             }
-            return new JsonResult(task);
+            catch (FormatException)
+            {
+                return BadRequest("Cron expression is invalid.");
+            }
         }
 
         // POST: Tasks/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost(Name = "Edit")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Description,ScheduleString,AssignedTo,AssignmentLevel,State")] Task task)
+        public async Task<IActionResult> Edit(int id, string? description, string? schedule, string? assignedTo, int? assignmentLevel, int? state)
         {
-            if (id != task.Id)
+            try
             {
-                return NotFound();
-            }
+                var task = await _context.Tasks.FindAsync(id);
+                if (task == null)
+                {
+                    return NotFound();
+                }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(task);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!TaskExists(task.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                _logger.Log(LogLevel.Information, "Editing task: " + task.Description);
+
+                task.Description = description ?? task.Description;
+                task.ScheduleString = schedule ?? task.ScheduleString;
+                task.UpdateCron();
+                task.AssignedTo = assignedTo ?? task.AssignedTo;
+                task.AssignmentLevel = (TaskAssignmentLevel?)assignmentLevel ?? task.AssignmentLevel;
+                task.State = (TaskState?)state ?? task.State;
+
+                _context.Update(task);
+                await _context.SaveChangesAsync();
+
+                return new JsonResult(task);
             }
-            return new JsonResult(task);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!TaskExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            catch (FormatException)
+            {
+                return BadRequest("Cron expression is invalid");
+            }
         }
 
         // DELETE: Tasks/Delete/5
         [HttpDelete(Name = "Delete"), ActionName("Delete")]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var task = await _context.Tasks.FindAsync(id);
             if (task != null)
             {
                 _context.Tasks.Remove(task);
+                await _context.SaveChangesAsync();
+                _logger.Log(LogLevel.Information, "Deleted task with ID " + id);
+
+                return StatusCode(200);
             }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return StatusCode(404);
         }
 
         private bool TaskExists(int id)
