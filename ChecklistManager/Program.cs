@@ -11,7 +11,7 @@ namespace ChecklistManager
 
             // Add services to the container.
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllersWithViews();
             builder.Services.AddDbContext<ChecklistTaskContext>(opt => opt.UseInMemoryDatabase("TaskList"));
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();

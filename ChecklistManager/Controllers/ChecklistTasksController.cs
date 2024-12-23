@@ -39,7 +39,7 @@ namespace ChecklistManager.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPut(Name = "Create")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Description,Schedule,AssignedTo,AssignmentLevel")] ChecklistTask task)
+        public async Task<IActionResult> Create([Bind("Description,ScheduleString,AssignedTo,AssignmentLevel")] ChecklistTask task)
         {
             if (ModelState.IsValid)
             {
@@ -49,7 +49,7 @@ namespace ChecklistManager.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(task);
+            return new JsonResult(task);
         }
 
         // POST: Tasks/Edit/5
@@ -57,7 +57,7 @@ namespace ChecklistManager.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost(Name = "Edit")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Description,Schedule,AssignedTo,AssignmentLevel,State")] Task task)
+        public async Task<IActionResult> Edit(int id, [Bind("Description,ScheduleString,AssignedTo,AssignmentLevel,State")] Task task)
         {
             if (id != task.Id)
             {
@@ -84,7 +84,7 @@ namespace ChecklistManager.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(task);
+            return new JsonResult(task);
         }
 
         // DELETE: Tasks/Delete/5
