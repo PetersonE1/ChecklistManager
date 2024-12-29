@@ -31,11 +31,20 @@ namespace ChecklistManager.Controllers
 
         // GET: Tasks
         [HttpGet(Name = "Tasks")]
-        public async Task<IActionResult> Index(bool filterByDay = false)
+        public async Task<IActionResult> Index(bool filterByDay = false, int assignmentLevel = -1, string? assignedTo = null)
         {
-            if (!filterByDay)
-                return new JsonResult(await _context.Tasks.ToListAsync());
-            return new JsonResult((await _context.Tasks.ToListAsync()).Where(t => t.Schedule == null || t.Schedule.IsSatisfiedBy(DateTime.UtcNow)));
+            List<ChecklistTask> tasks = await _context.Tasks.ToListAsync();
+
+            if (filterByDay)
+                tasks = tasks.Where(t => t.Schedule == null || t.Schedule.IsSatisfiedBy(DateTime.UtcNow)).ToList();
+
+            if (assignmentLevel != -1)
+                tasks = tasks.Where(t => t.AssignmentLevel == (TaskAssignmentLevel)assignmentLevel).ToList();
+
+            if (assignedTo != null)
+                tasks = tasks.Where(t => t.AssignedTo == assignedTo).ToList();
+
+            return new JsonResult(tasks);
         }
 
         // PUT: Tasks/Create
