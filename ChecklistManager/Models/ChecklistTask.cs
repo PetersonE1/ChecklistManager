@@ -10,13 +10,14 @@ namespace ChecklistManager.Models
         public string? DoneBy { get; set; }
         public TaskState State { get; set; }
         public TaskAssignmentLevel AssignmentLevel { get; set; }
+        public bool HighPriority { get; set; }
 
         // Seconds Minutes Hours Day-of-month Month Day-of-week Year(Optional)
         // Must assign to exactly one of either Day-of-month or Day-of-week, other must be ?
         public string? ScheduleString { get; set; }
         internal CronExpression? Schedule { get; set; } // If null, task is one-off (will rollover, but not repeat, aka always display null scheduled tasks)
 
-        public ChecklistTask(string description, string? scheduleString, string? assignedTo, TaskAssignmentLevel assignmentLevel)
+        public ChecklistTask(string description, string? scheduleString, string? assignedTo, TaskAssignmentLevel assignmentLevel, bool highPriority)
         {
             ScheduleString = scheduleString;
             UpdateCron();
@@ -25,6 +26,7 @@ namespace ChecklistManager.Models
             AssignmentLevel = assignmentLevel;
             State = TaskState.Incomplete;
             AssignedTo = assignedTo;
+            HighPriority = highPriority;
         }
 
         public void UpdateCron()

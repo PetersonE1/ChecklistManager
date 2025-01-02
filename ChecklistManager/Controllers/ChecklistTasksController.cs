@@ -53,7 +53,7 @@ namespace ChecklistManager.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPut(Name = "Create")]
-        public async Task<IActionResult> Create(string description, string? schedule, string? assignedTo, int assignmentLevel)
+        public async Task<IActionResult> Create(string description, string? schedule, string? assignedTo, int assignmentLevel, bool highPriority)
         {
             if (_context.Tasks.Any(t => t.Description == description &&
                     (t.AssignmentLevel == (TaskAssignmentLevel)assignmentLevel &&
@@ -64,7 +64,7 @@ namespace ChecklistManager.Controllers
 
             try
             {
-                var task = new ChecklistTask(description, schedule, assignedTo, (TaskAssignmentLevel)assignmentLevel);
+                var task = new ChecklistTask(description, schedule, assignedTo, (TaskAssignmentLevel)assignmentLevel, highPriority);
                 _logger.Log(LogLevel.Information, $"Creating {task.AssignmentLevel} task [ID:{task.Id}]: {task.Description}");
 
                 _context.Add(task);
@@ -88,7 +88,7 @@ namespace ChecklistManager.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost(Name = "Edit")]
-        public async Task<IActionResult> Edit(long id, string? description, string? schedule, string? assignedTo, string? doneBy, int? assignmentLevel, int? state)
+        public async Task<IActionResult> Edit(long id, string? description, string? schedule, string? assignedTo, string? doneBy, int? assignmentLevel, int? state, bool? highPriority)
         {
             try
             {
@@ -119,6 +119,7 @@ namespace ChecklistManager.Controllers
                 task.DoneBy = doneBy ?? task.DoneBy;
                 task.AssignmentLevel = (TaskAssignmentLevel?)assignmentLevel ?? task.AssignmentLevel;
                 task.State = taskState ?? task.State;
+                task.HighPriority = highPriority ?? task.HighPriority;
 
                 _context.Update(task);
                 await _context.SaveChangesAsync();
