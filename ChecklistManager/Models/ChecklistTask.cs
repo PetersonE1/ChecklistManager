@@ -7,6 +7,7 @@ namespace ChecklistManager.Models
         public long Id { get; set; } // Handled by SQLite primary key
         public string Description { get; set; } // Description of the task itself
         public string? AssignedTo { get; set; } // If null, task is communal
+        public string? DoneBy { get; set; }
         public TaskState State { get; set; }
         public TaskAssignmentLevel AssignmentLevel { get; set; }
 

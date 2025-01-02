@@ -14,11 +14,13 @@ namespace ChecklistManager.Controllers
     public class ChecklistTasksController : Controller
     {
         private readonly ChecklistTaskContext _context;
+        private readonly MemberContext _memberContext;
         private readonly ILogger<ChecklistTasksController> _logger;
 
-        public ChecklistTasksController(ChecklistTaskContext context, ILogger<ChecklistTasksController> logger)
+        public ChecklistTasksController(ChecklistTaskContext context, MemberContext memberContext, ILogger<ChecklistTasksController> logger)
         {
             _context = context;
+            _memberContext = memberContext;
             _logger = logger;
         }
 
@@ -67,6 +69,13 @@ namespace ChecklistManager.Controllers
 
                 _context.Add(task);
                 await _context.SaveChangesAsync();
+
+                if (assignedTo != null && _memberContext.Members.Find(assignedTo) == null)
+                {
+                    _memberContext.Add(new Member(assignedTo));
+                    await _memberContext.SaveChangesAsync();
+                }
+
                 return new JsonResult(task);
             }
             catch (FormatException)
@@ -79,7 +88,7 @@ namespace ChecklistManager.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost(Name = "Edit")]
-        public async Task<IActionResult> Edit(long id, string? description, string? schedule, string? assignedTo, int? assignmentLevel, int? state)
+        public async Task<IActionResult> Edit(long id, string? description, string? schedule, string? assignedTo, string? doneBy, int? assignmentLevel, int? state)
         {
             try
             {
@@ -91,12 +100,25 @@ namespace ChecklistManager.Controllers
 
                 _logger.Log(LogLevel.Information, "Editing task: " + task.Description);
 
+                TaskState? taskState = (TaskState?)state;
+                if (taskState != null && doneBy != null && taskState != task.State)
+                {
+
+                    var member = await _memberContext.Members.FindAsync(doneBy);
+                    if (member != null)
+                    {
+                        member.Score += taskState == TaskState.Complete ? 1 : -1;
+                        await _memberContext.SaveChangesAsync();
+                    }
+                }
+
                 task.Description = description ?? task.Description;
                 task.ScheduleString = schedule ?? task.ScheduleString;
                 task.UpdateCron();
                 task.AssignedTo = assignedTo ?? task.AssignedTo;
+                task.DoneBy = doneBy ?? task.DoneBy;
                 task.AssignmentLevel = (TaskAssignmentLevel?)assignmentLevel ?? task.AssignmentLevel;
-                task.State = (TaskState?)state ?? task.State;
+                task.State = taskState ?? task.State;
 
                 _context.Update(task);
                 await _context.SaveChangesAsync();
