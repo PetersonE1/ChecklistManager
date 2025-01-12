@@ -101,11 +101,13 @@ namespace ChecklistManager.Controllers
                 _logger.Log(LogLevel.Information, "Editing task: " + task.Description);
 
                 TaskState? taskState = (TaskState?)state;
-                if (taskState != null && doneBy != null && taskState != task.State)
+                if (taskState != null && taskState != task.State)
                 {
+                    if (doneBy != null)
+                        task.DoneBy = doneBy;
 
-                    var member = await _memberContext.Members.FindAsync(doneBy);
-                    if (member != null)
+                    var member = await _memberContext.Members.FindAsync(task.DoneBy);
+                    if (member != null && !(task.State == TaskState.Incomplete && taskState == TaskState.InProgress))
                     {
                         member.Score += taskState == TaskState.Complete ? 1 : -1;
                         await _memberContext.SaveChangesAsync();
