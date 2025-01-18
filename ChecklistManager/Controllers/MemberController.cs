@@ -38,7 +38,7 @@ namespace ChecklistManager.Controllers
         // PUT: Tasks/MassCreate
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPut(Name = "MassCreate")]
+        [HttpPut("~/Member/masscreate", Name = "MassCreateMembers")]
         public async Task<IActionResult> MassCreate(Member[] members)
         {
             foreach (Member member in members)
@@ -55,7 +55,7 @@ namespace ChecklistManager.Controllers
         // POST: Member/Edit/John
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost(Name = "Edit")]
+        [HttpPost(Name = "EditMember")]
         public async Task<IActionResult> Edit(string name, int score)
         {
             try
