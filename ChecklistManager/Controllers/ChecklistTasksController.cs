@@ -38,7 +38,7 @@ namespace ChecklistManager.Controllers
             List<ChecklistTask> tasks = await _context.Tasks.ToListAsync();
 
             if (filterByDay)
-                tasks = tasks.Where(t => t.Schedule == null || t.Schedule.IsSatisfiedBy(DateTime.Now)).ToList();
+                tasks = tasks.Where(t => t.Schedule == null || t.Schedule.IsSatisfiedBy(DateTime.UtcNow)).ToList();
 
             if (assignmentLevel != -1)
                 tasks = tasks.Where(t => t.AssignmentLevel == (TaskAssignmentLevel)assignmentLevel).ToList();
