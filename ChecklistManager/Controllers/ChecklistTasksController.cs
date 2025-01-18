@@ -84,6 +84,23 @@ namespace ChecklistManager.Controllers
             }
         }
 
+        // PUT: Tasks/MassCreate
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPut(Name = "MassCreate")]
+        public async Task<IActionResult> MassCreate(ChecklistTask[] tasks)
+        {
+            foreach (ChecklistTask task in tasks)
+            {
+                if (!_context.Tasks.Any(t => task.Id == t.Id))
+                {
+                    _context.Add(task);
+                }
+            }
+            await _context.SaveChangesAsync();
+            return new JsonResult(await _context.Tasks.ToListAsync());
+        }
+
         // POST: Tasks/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.

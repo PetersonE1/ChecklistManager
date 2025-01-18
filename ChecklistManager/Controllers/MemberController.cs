@@ -35,6 +35,63 @@ namespace ChecklistManager.Controllers
             }
         }
 
+        // PUT: Tasks/MassCreate
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPut(Name = "MassCreate")]
+        public async Task<IActionResult> MassCreate(Member[] members)
+        {
+            foreach (Member member in members)
+            {
+                if (!_context.Members.Any(m => member.Name == m.Name))
+                {
+                    _context.Add(member);
+                }
+            }
+            await _context.SaveChangesAsync();
+            return new JsonResult(await _context.Members.ToListAsync());
+        }
+
+        // POST: Member/Edit/John
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost(Name = "Edit")]
+        public async Task<IActionResult> Edit(string name, int score)
+        {
+            try
+            {
+                var member = await _context.Members.FindAsync(name);
+                if (member == null)
+                {
+                    return NotFound();
+                }
+
+                _logger.Log(LogLevel.Information, "Editing member: " + member.Name);
+
+                member.Score = score;
+
+                _context.Update(member);
+                await _context.SaveChangesAsync();
+
+                return new JsonResult(member);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (await _context.Members.FindAsync(name) == null)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            catch (FormatException)
+            {
+                return BadRequest("Cron expression is invalid");
+            }
+        }
+
         [HttpDelete(Name = "DeleteOrResetScores"), ActionName("DeleteOrResetScores")]
         public async Task<IActionResult> DeleteOrResetScores(string? name)
         {
