@@ -57,7 +57,12 @@ namespace ChecklistManager
             app.MapControllers();
 
             app.UseHangfireDashboard();
-            RecurringJob.AddOrUpdate<ChecklistTaskContext>("daily_reset", call => call.DailyReset(), "0 0 * * *");
+
+            RecurringJobOptions jobOptions = new RecurringJobOptions
+            {
+                TimeZone = TimeZoneInfo.Local
+            };
+            RecurringJob.AddOrUpdate<ChecklistTaskContext>("daily_reset", call => call.DailyReset(), "0 0 * * *", jobOptions);
 
             app.Run();
         }
