@@ -9,15 +9,6 @@ namespace ChecklistManager
     {
         public static void Main(string[] args)
         {
-            // TEMP DEBUG
-            string dir = Directory.GetCurrentDirectory();
-            string[] dirs = Directory.GetDirectories(Directory.GetCurrentDirectory());
-            Console.WriteLine(dir);
-            foreach (string d in dirs)
-            {
-                Console.WriteLine(d);
-            }
-
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
@@ -33,7 +24,7 @@ namespace ChecklistManager
             {
                 connection.Open();
                 var createTableCmd = connection.CreateCommand();
-                createTableCmd.CommandText = "CREATE TABLE IF NOT EXISTS Tasks (Id INTEGER PRIMARY KEY AUTOINCREMENT, Description TEXT NOT NULL, AssignedTo TEXT, DoneBy TEXT, State INTEGER NOT NULL, AssignmentLevel INTEGER NOT NULL, ScheduleString TEXT, HighPriority INTEGER NOT NULL);";
+                createTableCmd.CommandText = "CREATE TABLE IF NOT EXISTS Tasks (Id INTEGER PRIMARY KEY AUTOINCREMENT, Description TEXT NOT NULL, AssignedTo TEXT, DoneBy TEXT, State INTEGER NOT NULL, AssignmentLevel INTEGER NOT NULL, ScheduleString TEXT, HighPriority INTEGER NOT NULL, IsActive INTEGER NOT NULL);";
                 createTableCmd.ExecuteNonQuery();
 
                 createTableCmd.CommandText = "CREATE TABLE IF NOT EXISTS Members (Name TEXT PRIMARY KEY, Score INTEGER NOT NULL);";
