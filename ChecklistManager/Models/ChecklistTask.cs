@@ -11,6 +11,7 @@ namespace ChecklistManager.Models
         public TaskState State { get; set; }
         public TaskAssignmentLevel AssignmentLevel { get; set; }
         public bool HighPriority { get; set; }
+        public bool IsActive { get; set; }
 
         // Seconds Minutes Hours Day-of-month Month Day-of-week Year(Optional)
         // Must assign to exactly one of either Day-of-month or Day-of-week, other must be ?

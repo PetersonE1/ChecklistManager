@@ -17,11 +17,17 @@ namespace ChecklistManager.Models
                     if (task.Schedule != null)
                     {
                         task.State = TaskState.Incomplete;
+                        task.IsActive = false;
                     }
                     else
                     {
                         Tasks.Remove(task);
                     }
+                }
+                
+                if (task.Schedule?.IsSatisfiedBy(DateTime.Now) ?? true)
+                {
+                    task.IsActive = true;
                 }
             }
             await SaveChangesAsync();

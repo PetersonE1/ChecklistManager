@@ -38,7 +38,7 @@ namespace ChecklistManager.Controllers
             List<ChecklistTask> tasks = await _context.Tasks.ToListAsync();
 
             if (filterByDay)
-                tasks = tasks.Where(t => t.Schedule == null || t.Schedule.IsSatisfiedBy(DateTime.Now)).ToList();
+                tasks = tasks.Where(t => t.IsActive).ToList();
 
             if (assignmentLevel != -1)
                 tasks = tasks.Where(t => t.AssignmentLevel == (TaskAssignmentLevel)assignmentLevel).ToList();
@@ -67,6 +67,11 @@ namespace ChecklistManager.Controllers
                 var task = new ChecklistTask(description, schedule, assignedTo, (TaskAssignmentLevel)assignmentLevel, highPriority);
                 _logger.Log(LogLevel.Information, $"Creating {task.AssignmentLevel} task [ID:{task.Id}]: {task.Description}");
 
+                if (task.Schedule?.IsSatisfiedBy(DateTime.Now) ?? true)
+                {
+                    task.IsActive = true;
+                }
+
                 _context.Add(task);
                 await _context.SaveChangesAsync();
 
@@ -94,6 +99,10 @@ namespace ChecklistManager.Controllers
             {
                 if (!_context.Tasks.Any(t => task.Id == t.Id))
                 {
+                    if (task.Schedule?.IsSatisfiedBy(DateTime.Now) ?? true)
+                    {
+                        task.IsActive = true;
+                    }
                     _context.Add(task);
                 }
             }
