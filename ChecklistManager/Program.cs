@@ -9,6 +9,15 @@ namespace ChecklistManager
     {
         public static void Main(string[] args)
         {
+            // TEMP DEBUG
+            string dir = Directory.GetCurrentDirectory();
+            string[] dirs = Directory.GetDirectories(Directory.GetCurrentDirectory());
+            Console.WriteLine(dir);
+            foreach (string d in dirs)
+            {
+                Console.WriteLine(d);
+            }
+
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
