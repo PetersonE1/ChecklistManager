@@ -24,6 +24,8 @@ namespace ChecklistManager
             Console.WriteLine($"[DEBUG CHECKLIST MANAGER] APP Exists: {Directory.Exists("/app")}");
             Console.WriteLine($"[DEBUG CHECKLIST MANAGER] DATABASE Exists: {Directory.Exists("/app/database")}");
             Console.WriteLine($"[DEBUG CHECKLIST MANAGER] CURRENT DIRECTORY: {Directory.GetCurrentDirectory()}");
+            Directory.CreateDirectory("/app/database/test");
+            Console.WriteLine($"[DEBUG CHECKLIST MANAGER] TEST Exists: {Directory.Exists("/app/database/test")}");
 
             using (var connection = new SqliteConnection(taskConnectionString))
             {
